@@ -4,8 +4,8 @@
   "description": "implementing b2c functionality using mpesa api",
   "main": "app.js",
   "scripts": {
-    "dev": "nodemon ./src/final/app.js",
-    "start": "node ./src/final/app.js",
+    "dev": "nodemon ./src/app.js",
+    "start": "node ./src/app.js",
     "ngrok": "ngrok http 4000"
   },
   "repository": {
