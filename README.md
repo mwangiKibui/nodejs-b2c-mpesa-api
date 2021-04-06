@@ -1,4 +1,4 @@
-### Implementing B2C payment via Mpesa API using Node.js
+### B2c Mpesa API using Node.js
 
 - Clone the repository.
 
@@ -15,8 +15,6 @@
 npm install
 ```
 
-- Attain `CONSUMER KEY` and `CONSUMER SECRET` from your safaricom developer portal and paste them appropriately in the `.env` file at the root of your project.
-
 - Start the development server by running the following command:
 
 ```bash
@@ -31,6 +29,6 @@ npm run ngrok
 
 - Copy the HTTPS URL logged on your console and paste it appropriately on your `.env` file.
 
-- Head over to postman and send a `POST` request to `http://localhost:4000/b2c`.
+- Consume the functionalities from [here](http://localhost:4000/api-docs)
 
 - Congratulations !!!

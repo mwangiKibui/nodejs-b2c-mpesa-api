@@ -9,23 +9,45 @@ class Business {
     //get access token.
     async getAccessToken(req,res,next){
 
-        let consumer_key = process.env.CONSUMER_KEY;
-        let consumer_secret = process.env.CONSUMER_SECRET;
-        let url = "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credential";
-
-        let buf = new Buffer.from(`${consumer_key}:${consumer_secret}`).toString("base64");
+        // The consumer key and consumer secret will also be in the headers
+        
+        let {consumerkey,consumersecret} = req.headers;
+        let url = "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials";
+                        
+        let buf = new Buffer.from(`${consumerkey}:${consumersecret}`).toString("base64");
         let auth = `Basic ${buf}`;
 
-        let response = await axios.default.get(url,{
-            headers:{
-                "Authorization":auth
-            }
-        }).catch(console.log);
+        let response;
+        
+        try {
+            
+            response = await axios.default.get(url,{
+                headers:{
+                    "Authorization":auth
+                }
+            });
+        
+        } catch (error) {
 
-        //set access-token.
-        req.access_token = response.data.access_token;
+            let err_code = error.response.status;
+            let err_msg = error.response.statusText;
 
-        return next();
+            return res.status(err_code).send({
+                message:err_msg
+            });
+
+        }
+
+        //get access-token.
+        let accessToken  = response.data.access_token;
+
+        res.status(200);
+
+        // this will be returned
+        return res.send({
+           accessToken
+        });
+
     };
 
     
@@ -33,27 +55,46 @@ class Business {
     //b2c.
     async b2c(req,res,next){
 
-        let access_token = req.access_token;
+        //Since we will use swagger, the token will be in the headers.
+        let {accesstoken,initiatorname,securitycredential,commandid,amount,partya,partyb,remarks}= req.headers;
+        
+        
         let url = "https://sandbox.safaricom.co.ke/mpesa/b2c/v1/paymentrequest";
         let ngrok_url = process.env.NGROK_URL;
-        let auth = `Bearer ${access_token}`;
+        let auth = `Bearer ${accesstoken}`;
 
-        let response = await axios.default.post(url,{
-            "InitiatorName": "testapi",
-            "SecurityCredential":"DGjymbSJOUFtJ/HH4uuIgMeU1cFBIxgmnMrYDJikrR21FCAVfXW1U3oUzZc8EaRT9x7mA9jjGbmN2vFCM3JfrrrWCSAV68T/J3f/CLnTGzxk8jPPLES6nIVrWZDEdACcVfy+EHTawsqjtppEAU12GvpzWdaTTwsdXDAf7csFad7rSYS79RLdomY5ZIshtrmey8u4mRvqUo8yrRJ/oOZyuPtobu8Z80ysk6nYSkkUJd28mHVEwOBzSG+IHp5S1G+LGWX63fg6cbKuDg8C8ke7OQpnbleUHFE3hWec40J/Ybn1V6d0I09EgvgBTW5K2MxCx19GnKe/pO4I5DRrwooetQ==",
-            "CommandID": "CommissionPayment",
-            "Amount": "50",
-            "PartyA": "600868",
-            "PartyB": "254708374149",
-            "Remarks": "MarchSalary",
+        let response;
+        
+        try{
+
+            response = await axios.default.post(url,{
+            "InitiatorName": initiatorname,
+            "SecurityCredential":securitycredential,
+            "CommandID": commandid,
+            "Amount": amount,
+            "PartyA": partya,
+            "PartyB": partyb,
+            "Remarks": remarks,
             "QueueTimeOutURL": `${ngrok_url}/timeout`,
             "ResultURL": `${ngrok_url}/cb`,
-            "Occasion": "MarchSalary"
-        },{
-            headers:{
-                "Authorization":auth
-            }
-        }).catch(console.log);
+            "Occasion": remarks
+            },{
+                headers:{
+                    "Authorization":auth
+                }
+            })
+
+        }catch(error) {
+            
+            let err_code = error.response.status;
+            let err_msg = error.response.data.errorMessage;
+
+            return res.status(err_code).send({
+                message:err_msg
+            });
+        }
+
+        res.status(200);
 
         return res.send({
             result:response.data

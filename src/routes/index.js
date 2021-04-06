@@ -4,8 +4,11 @@ const router = express.Router();
 
 const Mpesa = require("../controllers/Mpesa");
 
-router.post('/b2c', 
-    (req,res,next) => new Mpesa().getAccessToken(req,res,next),
+router.get('/access-token', 
+    (req,res,next) => new Mpesa().getAccessToken(req,res,next)
+);
+
+router.post('/b2c',
     (req,res,next) => new Mpesa().b2c(req,res,next)
 );
 
